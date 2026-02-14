@@ -46,7 +46,7 @@ scaler = load_scaler()
 
 # Main Area - File Upload
 st.subheader("1. Upload Test Data (CSV)")
-st.info("Please upload the 'test_data.csv'")
+st.info("Please upload the csv file of test data")
 uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
 if uploaded_file is not None:
