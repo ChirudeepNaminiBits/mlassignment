@@ -11,6 +11,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, recall_score, f1_score, matthews_corrcoef
+
 url = "https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv"
 print(f"Downloading dataset from: {url}")
 df = pd.read_csv(url)
@@ -51,3 +53,39 @@ models = {
     "Random Forest": RandomForestClassifier(random_state=42),
     "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
 }
+results = []
+
+print("\nTraining Models...\n")
+
+for name, model in models.items():
+
+    if name in ["Logistic Regression", "KNN"]:
+        model.fit(X_train_scaled, y_train)
+        preds = model.predict(X_test_scaled)
+        probs = model.predict_proba(X_test_scaled)[:, 1]
+    else:
+        model.fit(X_train, y_train)
+        preds = model.predict(X_test)
+        probs = model.predict_proba(X_test)[:, 1]
+
+    filename = f"model/{name.replace(' ', '_').lower()}.pkl"
+    joblib.dump(model, filename)
+
+    acc = accuracy_score(y_test, preds)
+    auc = roc_auc_score(y_test, probs)
+    prec = precision_score(y_test, preds)
+    rec = recall_score(y_test, preds)
+    f1 = f1_score(y_test, preds)
+    mcc = matthews_corrcoef(y_test, preds)
+
+    results.append({
+        "ML Model Name": name,
+        "Accuracy": round(acc, 4),
+        "AUC": round(auc, 4),
+        "Precision": round(prec, 4),
+        "Recall": round(rec, 4),
+        "F1 Score": round(f1, 4),
+        "MCC": round(mcc, 4)
+    })
+results_df = pd.DataFrame(results)
+print(results_df)
