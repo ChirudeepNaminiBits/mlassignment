@@ -1,6 +1,15 @@
 import os
 import pandas as pd
 import numpy as np
+import joblib
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 url = "https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv"
 print(f"Downloading dataset from: {url}")
@@ -26,3 +35,19 @@ test_df['Churn'] = y_test
 test_df.to_csv('test_data.csv', index=False)
 print("Test data saved as test_data.csv")
 
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+if not os.path.exists('model'):
+    os.makedirs('model')
+
+joblib.dump(scaler, 'model/scaler.pkl')
+
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "Decision Tree": DecisionTreeClassifier(random_state=42),
+    "KNN": KNeighborsClassifier(),
+    "Naive Bayes": GaussianNB(),
+    "Random Forest": RandomForestClassifier(random_state=42),
+    "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
+}
